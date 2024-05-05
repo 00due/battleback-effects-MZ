@@ -3,7 +3,7 @@
 
 This plugin allows you to create battle background effects similar to those in Earthbound.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/fgIyVK0hqig?si=6Wsnu90aaM_l6YC7" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Demo video](https://img.youtube.com/vi/fgIyVK0hqig/0.jpg)](https://www.youtube.com/watch?v=fgIyVK0hqig)
 
 Effects included:
 ```
