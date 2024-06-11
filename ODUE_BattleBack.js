@@ -131,6 +131,36 @@
  * @default 1.0
  * @decimals 1
  * 
+ * @command hue
+ * @text hue shift
+ * @desc Continuous hue shifting of battle background.
+ * 
+ * @arg bgid
+ * @text background ID
+ * @desc Which background to apply the twist effect to?
+ * @type select
+ * @option Lower Background
+ * @value 0
+ * @option Upper Background
+ * @value 1
+ * @default 0
+ * 
+ * @arg type
+ * @text hue shift easing
+ * @type select
+ * @option Linear
+ * @value 0
+ * @option Sine
+ * @value 1
+ * @default 0
+ * 
+ * @arg speed
+ * @desc How quickly should it shift?
+ * @type number
+ * @min 1
+ * @max 1000
+ * @default 50
+ * 
  * @command refreshBg
  * @text Refresh Background
  * @desc Refresh the battle background (for changing bg in-battle).
@@ -145,8 +175,10 @@
     let lowerScroll = [0, 0];
     let upperScroll = [0, 0];
 
+    // Filter arrays for battlebacks
     let bbg1Filters = [];
     let bbg2Filters = [];
+
     let waveSpd1 = 0.1;
     let waveSpd2 = 0.1;
     let upperTwistAngle = 0;
@@ -155,14 +187,20 @@
     let upperTwistTime = 0;
     let upperTwistSpeed = 0.1;
     let lowerTwistSpeed = 0.1;
+    let lowerHue = 0;
+    let upperHue = 0;
+    let lowerHueSpeed = 0;
+    let upperHueSpeed = 0;
+    let lowerHueSineWave = false;
+    let upperHueSineWave = false;
+    let lowerHueSineTime = 0;
+    let upperHueSineTime = 0;
 
     PluginManager.registerCommand("ODUE_BattleBack", "setScroll", args => {
-        console.log(args);
         lowerScroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "setScroll2", args => {
-        console.log(args);
         upperScroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
     });
 
@@ -205,6 +243,20 @@
         }
     });
 
+    PluginManager.registerCommand("ODUE_BattleBack", "hue", args => {
+        const filter = new PIXI.filters.ColorMatrixFilter();
+        if (Number(args.bgid == 0)) {
+            lowerHueSineWave = (Number(args.type) == 1);
+            bbg1Filters.push(filter);
+            lowerHueSpeed = Number(args.speed);
+        }
+        else {
+            upperHueSineWave = (Number(args.type) == 1);
+            bbg2Filters.push(filter);
+            upperHueSpeed = Number(args.speed);
+        }
+    })
+
     PluginManager.registerCommand("ODUE_BattleBack", "refreshBg", args => {
         SceneManager._scene._spriteset.refreshBbg();
     });
@@ -246,7 +298,8 @@
     const Spriteset_Battle_update = Spriteset_Battle.prototype.update;
     Spriteset_Battle.prototype.update = function() {
         Spriteset_Battle_update.call(this);
-        console.log(`${lowerScroll} ${upperScroll}`);
+        
+        //TODO: Add these to another function
         this._back1Sprite.origin.x += lowerScroll[0] || 0;
         this._back1Sprite.origin.y += lowerScroll[1] || 0;
         this._back2Sprite.origin.x += upperScroll[0] || 0;
@@ -259,6 +312,17 @@
             if (bbg1Filters[i] instanceof PIXI.filters.TwistFilter) {
                 updateLowerTwistAngle(bbg1Filters[i]);
             }
+            if (bbg1Filters[i] instanceof PIXI.filters.ColorMatrixFilter) {
+                if (!lowerHueSineWave) {
+                    if (lowerHue > 360) lowerHue = 0;
+                    else lowerHue += lowerHueSpeed / 10;
+                }
+                else {
+                    lowerHue = (Math.sin(lowerHueSineTime * lowerHueSpeed / 1000) + 1) / 2 * 360;
+                    lowerHueSineTime += 1;
+                }
+                bbg1Filters[i].hue(lowerHue, false);
+            }
             
         }
         for (let i = 0; i < bbg2Filters.length; i++) {
@@ -267,6 +331,17 @@
             }
             if (bbg2Filters[i] instanceof PIXI.filters.TwistFilter) {
                 updateUpperTwistAngle(bbg2Filters[i]);
+            }
+            if (bbg2Filters[i] instanceof PIXI.filters.ColorMatrixFilter) {
+                if (!upperHueSineWave) {
+                    if (upperHue > 360) upperHue = 0;
+                    else upperHue += upperHueSpeed / 10;
+                }
+                else {
+                    upperHue = (Math.sin(upperHueSineTime * upperHueSpeed / 1000) + 1) / 2 * 360;
+                    upperHueSineTime += 1;
+                }
+                bbg2Filters[i].hue(upperHue, false);
             }
         }
     };
