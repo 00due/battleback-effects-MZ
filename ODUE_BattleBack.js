@@ -1,5 +1,5 @@
 /*:
- * @plugindesc (ver1.0) Battle Background effects plugin
+ * @plugindesc (ver1.2) Battle Background effects plugin
  * @author ODUE
  * @url https://github.com/00due/battleback-effects-MZ
  * @target MZ
@@ -132,7 +132,7 @@
  * @decimals 1
  * 
  * @command hue
- * @text hue shift
+ * @text Hue shift / brightness
  * @desc Continuous hue shifting of battle background.
  * 
  * @arg bgid
@@ -160,6 +160,39 @@
  * @min 1
  * @max 1000
  * @default 50
+ * 
+ * @arg range
+ * @desc Example for 60: will hue shift in range of 0 and 60. Use 360 for full range.
+ * @type number
+ * @min 0
+ * @max 360
+ * @default 360
+ * 
+ * @arg minimumBrightness
+ * @text minimum brightness
+ * @desc Minimum brightness of brightness shifting
+ * @type number
+ * @min 0.00
+ * @max 10.00
+ * @default 1.00
+ * @decimals 2
+ * 
+ * @arg maximumBrightness
+ * @text maximum brightness
+ * @desc Maximum brightness of brightness shifting
+ * @type number
+ * @min 0.00
+ * @max 10.00
+ * @default 1.00
+ * @decimals 2
+ * 
+ * @arg brightnessSpeed
+ * @text brightness speed
+ * @desc How quickly should it shift? Use 0 for no brightness shift.
+ * @type number
+ * @min 0
+ * @max 1000
+ * @default 0
  * 
  * @command refreshBg
  * @text Refresh Background
@@ -195,6 +228,16 @@
     let upperHueSineWave = false;
     let lowerHueSineTime = 0;
     let upperHueSineTime = 0;
+    let lowerHueRange = 0;
+    let upperHueRange = 0;
+    let lowerHueRangeReverse = false;
+    let upperHueRangeReverse = false;
+    let lowerBrightness = 1;
+    let upperBrightness = 1;
+    let lowerBrightnessSpeed = 0;
+    let upperBrightnessSpeed = 0;
+    let lowerBrightnessRange = [1, 1];
+    let upperBrightnessRange = [1, 1];
 
     PluginManager.registerCommand("ODUE_BattleBack", "setScroll", args => {
         lowerScroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
@@ -243,17 +286,26 @@
         }
     });
 
+    //Hue + brightness
     PluginManager.registerCommand("ODUE_BattleBack", "hue", args => {
         const filter = new PIXI.filters.ColorMatrixFilter();
         if (Number(args.bgid == 0)) {
             lowerHueSineWave = (Number(args.type) == 1);
             bbg1Filters.push(filter);
             lowerHueSpeed = Number(args.speed);
+            lowerHueRange = Number(args.range);
+
+            lowerBrightnessRange = [Number(args.minimumBrightness), Number(args.maximumBrightness)];
+            lowerBrightnessSpeed = Number(args.brightnessSpeed);
         }
         else {
             upperHueSineWave = (Number(args.type) == 1);
             bbg2Filters.push(filter);
             upperHueSpeed = Number(args.speed);
+            upperHueRange = Number(args.range);
+
+            upperBrightnessRange = [Number(args.minimumBrightness), Number(args.maximumBrightness)];
+            upperBrightnessSpeed = Number(args.brightnessSpeed);
         }
     })
 
@@ -314,14 +366,33 @@
             }
             if (bbg1Filters[i] instanceof PIXI.filters.ColorMatrixFilter) {
                 if (!lowerHueSineWave) {
-                    if (lowerHue > 360) lowerHue = 0;
-                    else lowerHue += lowerHueSpeed / 10;
+                    if (lowerHueRange >= 360) {
+                        if (lowerHue > 360) lowerHue = 0;
+                        else lowerHue += lowerHueSpeed / 10;
+                    }
+                    else {
+                        if (!lowerHueRangeReverse) {
+                            if (lowerHue > lowerHueRange) lowerHueRangeReverse = true;
+                            else lowerHue += lowerHueSpeed / 10;
+                        }
+                        else {
+                            if (lowerHue <= 0) lowerHueRangeReverse = false;
+                            else lowerHue -= lowerHueSpeed / 10;
+                        }
+                    }
                 }
                 else {
-                    lowerHue = (Math.sin(lowerHueSineTime * lowerHueSpeed / 1000) + 1) / 2 * 360;
-                    lowerHueSineTime += 1;
+                    lowerHue = (Math.sin(lowerHueSineTime * lowerHueSpeed / 1000) + 1) / 2 * (lowerHueRange);
                 }
+
+                if (lowerBrightnessSpeed != 0) {
+                    lowerBrightness = (Math.sin(lowerHueSineTime * lowerBrightnessSpeed / 1000) + 1) / 2 * (lowerBrightnessRange[1] - lowerBrightnessRange[0]) + lowerBrightnessRange[0];
+                }
+
+                if (lowerHueSineWave || lowerBrightnessSpeed != 0) lowerHueSineTime += 1;
+
                 bbg1Filters[i].hue(lowerHue, false);
+                if (lowerBrightnessSpeed != 0) bbg1Filters[i].brightness(lowerBrightness, true);
             }
             
         }
@@ -334,14 +405,33 @@
             }
             if (bbg2Filters[i] instanceof PIXI.filters.ColorMatrixFilter) {
                 if (!upperHueSineWave) {
-                    if (upperHue > 360) upperHue = 0;
-                    else upperHue += upperHueSpeed / 10;
+                    if (upperHueRange >= 360) {
+                        if (upperHue > 360) upperHue = 0;
+                        else upperHue += upperHueSpeed / 10;
+                    }
+                    else {
+                        if (!upperHueRangeReverse) {
+                            if (upperHue > upperHueRange) upperHueRangeReverse = true;
+                            else upperHue += upperHueSpeed / 10;
+                        }
+                        else {
+                            if (upperHue <= 0) upperHueRangeReverse = false;
+                            else upperHue -= upperHueSpeed / 10;
+                        }
+                    }
                 }
                 else {
-                    upperHue = (Math.sin(upperHueSineTime * upperHueSpeed / 1000) + 1) / 2 * 360;
-                    upperHueSineTime += 1;
+                    upperHue = (Math.sin(upperHueSineTime * upperHueSpeed / 1000) + 1) / 2 * (upperHueRange);
                 }
+
+                if (upperBrightnessSpeed != 0) {
+                    upperBrightness = (Math.sin(upperHueSineTime * upperBrightnessSpeed / 1000) + 1) / 2 * (upperBrightnessRange[1] - upperBrightnessRange[0]) + upperBrightnessRange[0];
+                }
+
+                if (upperHueSineWave || upperBrightnessSpeed != 0) upperHueSineTime += 1;
+
                 bbg2Filters[i].hue(upperHue, false);
+                if (upperBrightnessSpeed != 0) bbg2Filters[i].brightness(upperBrightness, true);
             }
         }
     };
