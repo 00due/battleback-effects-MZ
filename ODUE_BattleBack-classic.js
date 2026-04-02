@@ -340,13 +340,11 @@
         this._back2Sprite.origin.y = 0;
     };
 
+    const Spriteset_Battle_createBattleback = Spriteset_Battle.prototype.createBattleback;
     Spriteset_Battle.prototype.createBattleback = function() {
-        this._back1Sprite = new Sprite_Battleback(0);
+        Spriteset_Battle_createBattleback.call(this);
         this._back1Sprite.filters = bbg1Filters;
-        this._back2Sprite = new Sprite_Battleback(1);
         this._back2Sprite.filters = bbg2Filters;
-        this._baseSprite.addChild(this._back1Sprite);
-        this._baseSprite.addChild(this._back2Sprite);
     };
 
     const Spriteset_Battle_update = Spriteset_Battle.prototype.update;
