@@ -1,5 +1,5 @@
 /*:
- * @plugindesc (ver1.3) Battle Background effects plugin
+ * @plugindesc (ver1.4) Battle Background effects plugin
  * @author ODUE
  * @url https://github.com/00due/battleback-effects-MZ
  * @target MZ
@@ -92,7 +92,7 @@
  * 
  * @command setBackgrounds
  * @text Set battle backgrounds
- * @desc Set the battle backgrounds.
+ * @desc Set the battle backgrounds. This will also remove all previously set battle backgrounds and effects.
  * 
  * @arg battlebacks
  * @text Battle Backgrounds
@@ -100,6 +100,23 @@
  * @type file[]
  * @dir img
  * @default []
+ * 
+ * @command replaceBg
+ * @text Replace battle background
+ * @desc Replace a battle background with another one. This won't affect any other backgrounds than the selected one.
+ * 
+ * @arg bgid
+ * @text background ID
+ * @desc Which background to replace? (1 for the first one, 2 for the second one, etc.)
+ * @type number
+ * @min 1
+ * @default 1
+ * 
+ * @arg battleback
+ * @text Battle Background
+ * @desc Battle background to replace with.
+ * @type file
+ * @dir img
  *
  * @command setScroll
  * @text Set scroll for battle background
@@ -349,6 +366,13 @@
         const backgrounds = JSON.parse(args.battlebacks);
         battlebacks = backgrounds;
         initializeSettings(battlebacks.length);
+        requestBbgRefresh();
+    });
+
+    PluginManager.registerCommand("ODUE_BattleBack", "replaceBg", args => {
+        const index = Number(args.bgid) - 1;
+        if (index < 0 || index >= battlebacks.length) return;
+        battlebacks[index] = args.battleback;
         requestBbgRefresh();
     });
 
