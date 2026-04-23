@@ -544,6 +544,12 @@
             this.updateEffects();
         }
     };
+
+    const _Sprite_Battleback_onBitmapLoad = Sprite_Battleback.prototype._onBitmapLoad;
+    Sprite_Battleback.prototype._onBitmapLoad = function() {
+        if (!this.texture) return; // Prevent crash if destroyed
+        _Sprite_Battleback_onBitmapLoad.call(this);
+    };
 })();
 
 /*!
