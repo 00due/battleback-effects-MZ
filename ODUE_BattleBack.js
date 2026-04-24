@@ -377,14 +377,17 @@
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "setScroll", args => {
-        const scroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
-
         const index = Number(args.bgid) - 1;
         if (!effectSettings[index]) return;
+
+        const scroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
         effectSettings[index].scroll = scroll;
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "setWave", args => {
+        const index = Number(args.bgid) - 1;
+        if (!effectSettings[index]) return;
+
         const filterSetting = {
             alpha: [1, 1],
             amplitude: [Number(args.amplitude), Number(args.amplitude)],
@@ -393,33 +396,48 @@
             waveLength: [Number(args.wavelength), Number(args.wavelength)],
             time: 0
         };
-        const filter = new PIXI.filters.ReflectionFilter(filterSetting);
 
-        const index = Number(args.bgid) - 1;
-        if (!effectSettings[index]) return;
-        bbgFilters[index].push(filter);
+        let filter = bbgFilters[index].find(f => f instanceof PIXI.filters.ReflectionFilter);
+        if (filter) {
+            Object.assign(filter, filterSetting);
+        }
+        else {
+            filter = new PIXI.filters.ReflectionFilter(filterSetting);
+            bbgFilters[index].push(filter);
+        }
         effectSettings[index].waveSpeed = Number(args.speed) / 10;
         requestBbgRefresh();
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "twist", args => {
-        const filter = new PIXI.filters.TwistFilter(Number(args.radius), 0, 20);
-        filter.offset = new PIXI.Point(Graphics.width / 2, Graphics.height / 2);
-
         const index = Number(args.bgid) - 1;
         if (!effectSettings[index]) return;
-        bbgFilters[index].push(filter);
+
+        let filter = bbgFilters[index].find(f => f instanceof PIXI.filters.TwistFilter);
+        if (filter) {
+            filter.radius = Number(args.radius);
+        }
+        else {
+            filter = new PIXI.filters.TwistFilter(Number(args.radius), 0, 20);
+            filter.offset = new PIXI.Point(Graphics.width / 2, Graphics.height / 2);
+            bbgFilters[index].push(filter);
+        }
+
         effectSettings[index].twistAngle = Number(args.angle);
         effectSettings[index].twistSpeed = Number(args.speed);
         requestBbgRefresh();
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "hue", args => {
-        const filter = new PIXI.filters.ColorMatrixFilter();
-
         const index = Number(args.bgid) - 1;
         if (!effectSettings[index]) return;
-        bbgFilters[index].push(filter);
+
+        let filter = bbgFilters[index].find(f => f instanceof PIXI.filters.ColorMatrixFilter);
+        if (!filter) {
+            filter = new PIXI.filters.ColorMatrixFilter();
+            bbgFilters[index].push(filter);
+        }
+
         effectSettings[index].hueSineWave = (Number(args.type) == 1);
         effectSettings[index].hueSpeed = Number(args.speed);
         effectSettings[index].hueRange = Number(args.range);
