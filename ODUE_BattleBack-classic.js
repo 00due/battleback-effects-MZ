@@ -1,5 +1,5 @@
 /*:
- * @plugindesc (classic ver1.2) Battle Background effects plugin
+ * @plugindesc (classic ver1.2.1) Battle Background effects plugin
  * @author ODUE
  * @url https://github.com/00due/battleback-effects-MZ
  * @target MZ
@@ -239,15 +239,15 @@
     let lowerBrightnessRange = [1, 1];
     let upperBrightnessRange = [1, 1];
 
-    PluginManager.registerCommand("ODUE_BattleBack", "setScroll", args => {
+    PluginManager.registerCommand("ODUE_BattleBack-classic", "setScroll", args => {
         lowerScroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
     });
 
-    PluginManager.registerCommand("ODUE_BattleBack", "setScroll2", args => {
+    PluginManager.registerCommand("ODUE_BattleBack-classic", "setScroll2", args => {
         upperScroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
     });
 
-    PluginManager.registerCommand("ODUE_BattleBack", "setWave", args => {
+    PluginManager.registerCommand("ODUE_BattleBack-classic", "setWave", args => {
         const filterSetting = {
             alpha: [1, 1],
             amplitude: [Number(args.amplitude), Number(args.amplitude)],
@@ -267,7 +267,7 @@
         }
     });
 
-    PluginManager.registerCommand("ODUE_BattleBack", "twist", args => {
+    PluginManager.registerCommand("ODUE_BattleBack-classic", "twist", args => {
         const filterSetting = {
             angle: 0,
             radius: Number(args.radius),
@@ -287,7 +287,7 @@
     });
 
     //Hue + brightness
-    PluginManager.registerCommand("ODUE_BattleBack", "hue", args => {
+    PluginManager.registerCommand("ODUE_BattleBack-classic", "hue", args => {
         const filter = new PIXI.filters.ColorMatrixFilter();
         if (Number(args.bgid == 0)) {
             lowerHueSineWave = (Number(args.type) == 1);
@@ -309,11 +309,11 @@
         }
     })
 
-    PluginManager.registerCommand("ODUE_BattleBack", "refreshBg", args => {
+    PluginManager.registerCommand("ODUE_BattleBack-classic", "refreshBg", args => {
         SceneManager._scene._spriteset.refreshBbg();
     });
 
-    PluginManager.registerCommand("ODUE_BattleBack", "removeFilters", args => {
+    PluginManager.registerCommand("ODUE_BattleBack-classic", "removeFilters", args => {
         bbg1Filters = [];
         bbg2Filters = [];
         lowerScroll = [0, 0];
