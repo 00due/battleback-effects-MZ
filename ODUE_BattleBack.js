@@ -1,5 +1,5 @@
 /*:
- * @plugindesc (ver1.4) Battle Background effects plugin
+ * @plugindesc (ver1.4.1) Battle Background effects plugin
  * @author ODUE
  * @url https://github.com/00due/battleback-effects-MZ
  * @target MZ
@@ -497,6 +497,17 @@
         this._back1Sprite?.adjustPosition();
         this._back2Sprite?.adjustPosition();
         for (const sprite of this._backSprites) {
+            if (!sprite.bitmap || !sprite.bitmap.isReady()) {
+                if (Utils.isOptionValid("test")) {
+                    throw new Error(
+                        `Battleback bitmap could not be loaded.
+                        This is likely caused by a wrong plugin order.
+                        Try moving the ODUE_BattleBack plugin below other plugins
+                        for better compatibility.`
+                    );
+                }
+                continue;
+            }
             sprite.adjustPosition();
         }
         this._battlebackLocated = true;
