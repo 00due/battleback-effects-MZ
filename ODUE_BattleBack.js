@@ -1,5 +1,5 @@
 /*:
- * @plugindesc (ver1.4.1) Battle Background effects plugin
+ * @plugindesc (ver1.4.2) Battle Background effects plugin
  * @author ODUE
  * @url https://github.com/00due/battleback-effects-MZ
  * @target MZ
@@ -123,15 +123,15 @@
  * @desc Set the scroll speed for the battle background.
  * 
  * @arg bgid
- * @text background ID
- * @desc Which background to apply the scroll to?
- * @type number
+ * @text background IDs
+ * @desc Which backgrounds to apply the scroll to?
+ * @type number[]
  * @min 1
- * @default 1
+ * @default ["1"]
  * 
  * @arg horizontalScroll
  * @text Horizontal Scroll Speed
- * @desc Speed of horizontal scrolling for the battle background.
+ * @desc Speed of horizontal scrolling for the battle backgrounds.
  * @type number
  * @default 0.00
  * @min -100
@@ -139,7 +139,7 @@
  * 
  * @arg verticalScroll
  * @text Vertical Scroll Speed
- * @desc Speed of vertical scrolling for the battle background.
+ * @desc Speed of vertical scrolling for the battle backgrounds.
  * @type number
  * @default 0.00
  * @min -100
@@ -150,11 +150,11 @@
  * @desc Make background wavy
  * 
  * @arg bgid
- * @text background ID
- * @desc Which background to apply the wave effect to?
- * @type number
+ * @text background IDs
+ * @desc Which backgrounds to apply the wave effect to?
+ * @type number[]
  * @min 1
- * @default 1
+ * @default ["1"]
  * 
  * @arg amplitude
  * @desc How much does it wave?
@@ -182,11 +182,11 @@
  * @desc Twist the battle background.
  * 
  * @arg bgid
- * @text background ID
- * @desc Which background to apply the twist effect to?
- * @type number
+ * @text background IDs
+ * @desc Which backgrounds to apply the twist effect to?
+ * @type number[]
  * @min 1
- * @default 1
+ * @default ["1"]
  * 
  * @arg radius
  * @desc How much of screen should twist?
@@ -216,11 +216,11 @@
  * @desc Continuous hue shifting of battle background.
  * 
  * @arg bgid
- * @text background ID
- * @desc Which background to apply the twist effect to?
- * @type number
+ * @text background IDs
+ * @desc Which backgrounds to apply the twist effect to?
+ * @type number[]
  * @min 1
- * @default 1
+ * @default ["1"]
  * 
  * @arg type
  * @text hue shift easing
@@ -378,72 +378,101 @@ ODUE.BattleBack = ODUE.BattleBack || {};
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "setScroll", args => {
-        const index = Number(args.bgid) - 1;
-        if (!effectSettings[index]) return;
+        let layers;
+        if (args.bgid.includes("[")) {
+            layers = JSON.parse(args.bgid).map(id => Number(id) - 1);
+        } else {
+            layers = [Number(args.bgid) - 1]; // Compatibility with older versions
+        }
 
-        const scroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
-        effectSettings[index].scroll = scroll;
+        layers.forEach(layer => {
+            if (!effectSettings[layer]) return;
+            const scroll = [Number(args.horizontalScroll) || 0, Number(args.verticalScroll) || 0];
+            effectSettings[layer].scroll = scroll;
+        });
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "setWave", args => {
-        const index = Number(args.bgid) - 1;
-        if (!effectSettings[index]) return;
-
-        const filterSetting = {
-            alpha: [1, 1],
-            amplitude: [Number(args.amplitude), Number(args.amplitude)],
-            boundary: 0.0,
-            mirror: false,
-            waveLength: [Number(args.wavelength), Number(args.wavelength)],
-            time: 0
-        };
-
-        let filter = bbgFilters[index].find(f => f instanceof PIXI.filters.ReflectionFilter);
-        if (filter) {
-            Object.assign(filter, filterSetting);
+        let layers;
+        if (args.bgid.includes("[")) {
+            layers = JSON.parse(args.bgid).map(id => Number(id) - 1);
+        } else {
+            layers = [Number(args.bgid) - 1]; // Compatibility with older versions
         }
-        else {
-            filter = new PIXI.filters.ReflectionFilter(filterSetting);
-            bbgFilters[index].push(filter);
-        }
-        effectSettings[index].waveSpeed = Number(args.speed) / 10;
+        
+        layers.forEach(layer => {
+            if (!effectSettings[layer]) return;
+            const filterSetting = {
+                alpha: [1, 1],
+                amplitude: [Number(args.amplitude), Number(args.amplitude)],
+                boundary: 0.0,
+                mirror: false,
+                waveLength: [Number(args.wavelength), Number(args.wavelength)],
+                time: 0
+            };
+            let filter = bbgFilters[layer].find(f => f instanceof PIXI.filters.ReflectionFilter);
+            if (filter) {
+                Object.assign(filter, filterSetting);
+            }
+            else {
+                filter = new PIXI.filters.ReflectionFilter(filterSetting);
+                bbgFilters[layer].push(filter);
+            }
+            effectSettings[layer].waveSpeed = Number(args.speed) / 10;
+        });
+
         requestBbgRefresh();
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "twist", args => {
-        const index = Number(args.bgid) - 1;
-        if (!effectSettings[index]) return;
-
-        let filter = bbgFilters[index].find(f => f instanceof PIXI.filters.TwistFilter);
-        if (filter) {
-            filter.radius = Number(args.radius);
-        }
-        else {
-            filter = new PIXI.filters.TwistFilter(Number(args.radius), 0, 20);
-            filter.offset = new PIXI.Point(Graphics.width / 2, Graphics.height / 2);
-            bbgFilters[index].push(filter);
+        let layers;
+        if (args.bgid.includes("[")) {
+            layers = JSON.parse(args.bgid).map(id => Number(id) - 1);
+        } else {
+            layers = [Number(args.bgid) - 1]; // Compatibility with older versions
         }
 
-        effectSettings[index].twistAngle = Number(args.angle);
-        effectSettings[index].twistSpeed = Number(args.speed);
+        layers.forEach(layer => {
+            if (!effectSettings[layer]) return;
+            let filter = bbgFilters[layer].find(f => f instanceof PIXI.filters.TwistFilter);
+            if (filter) {
+                filter.radius = Number(args.radius);
+            }
+            else {
+                filter = new PIXI.filters.TwistFilter(Number(args.radius), 0, 20);
+                filter.offset = new PIXI.Point(Graphics.width / 2, Graphics.height / 2);
+                bbgFilters[layer].push(filter);
+            }
+            effectSettings[layer].twistAngle = Number(args.angle);
+            effectSettings[layer].twistSpeed = Number(args.speed);
+        });
+
         requestBbgRefresh();
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "hue", args => {
-        const index = Number(args.bgid) - 1;
-        if (!effectSettings[index]) return;
-
-        let filter = bbgFilters[index].find(f => f instanceof PIXI.filters.ColorMatrixFilter);
-        if (!filter) {
-            filter = new PIXI.filters.ColorMatrixFilter();
-            bbgFilters[index].push(filter);
+        let layers;
+        if (args.bgid.includes("[")) {
+            layers = JSON.parse(args.bgid).map(id => Number(id) - 1);
+        } else {
+            layers = [Number(args.bgid) - 1]; // Compatibility with older versions
         }
 
-        effectSettings[index].hueSineWave = (Number(args.type) == 1);
-        effectSettings[index].hueSpeed = Number(args.speed);
-        effectSettings[index].hueRange = Number(args.range);
-        effectSettings[index].brightnessRange = [Number(args.minimumBrightness), Number(args.maximumBrightness)];
-        effectSettings[index].brightnessSpeed = Number(args.brightnessSpeed);
+
+        layers.forEach(layer => {
+            if (!effectSettings[layer]) return;
+            let filter = bbgFilters[layer].find(f => f instanceof PIXI.filters.ColorMatrixFilter);
+            if (!filter) {
+                filter = new PIXI.filters.ColorMatrixFilter();
+                bbgFilters[layer].push(filter);
+            }
+            effectSettings[layer].hueSpeed = Number(args.speed);
+            effectSettings[layer].hueRange = Number(args.range);
+            effectSettings[layer].hueSineWave = Number(args.type) === 1;
+            effectSettings[layer].brightnessSpeed = Number(args.brightnessSpeed);
+            effectSettings[layer].brightnessRange = [Number(args.minimumBrightness), Number(args.maximumBrightness)];
+        });
+
         requestBbgRefresh();
     });
 
