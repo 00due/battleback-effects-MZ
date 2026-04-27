@@ -293,7 +293,8 @@
  * @desc Remove all effects from the battle background (not including scroll).
  * 
  */
-
+var ODUE = ODUE || {};
+ODUE.BattleBack = ODUE.BattleBack || {};
 (() => {
     let battlebacks = [];
 
@@ -466,11 +467,11 @@
 
     const requestBbgRefresh = () => {
         if (SceneManager._scene instanceof Scene_Battle) {
-            SceneManager._scene._spriteset.refreshBbg();
+            SceneManager._scene._spriteset.refreshBattleback();
         }
     };
 
-    Spriteset_Battle.prototype.refreshBbg = function() {
+    Spriteset_Battle.prototype.refreshBattleback = function() {
         this.createBattleback();
         this._battlebackLocated = false; // Force repositioning of battlebacks
     };
