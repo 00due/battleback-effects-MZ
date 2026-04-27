@@ -1,5 +1,5 @@
 /*:
- * @plugindesc (classic ver1.2.1) Battle Background effects plugin
+ * @plugindesc (classic ver1.2.2) Battle Background effects plugin
  * @author ODUE
  * @url https://github.com/00due/battleback-effects-MZ
  * @target MZ
@@ -310,6 +310,7 @@
     })
 
     PluginManager.registerCommand("ODUE_BattleBack-classic", "refreshBg", args => {
+        if (!(SceneManager._scene instanceof Scene_Battle)) return;
         SceneManager._scene._spriteset.refreshBbg();
     });
 
@@ -333,7 +334,7 @@
 
     Spriteset_Battle.prototype.refreshBbg = function() {
         this._back1Sprite.bitmap = this._back1Sprite.battleback1Bitmap();
-        this._back2Sprite.bitmap = this._back1Sprite.battleback2Bitmap();
+        this._back2Sprite.bitmap = this._back2Sprite.battleback2Bitmap();
         this._back1Sprite.origin.x = 0;
         this._back2Sprite.origin.x = 0;
         this._back1Sprite.origin.y = 0;
