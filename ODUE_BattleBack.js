@@ -1,93 +1,132 @@
 /*:
- * @plugindesc (ver1.4.2) Battle Background effects plugin
+ * @plugindesc (ver1.4.3) Battle Background effects plugin
  * @author ODUE
  * @url https://github.com/00due/battleback-effects-MZ
  * @target MZ
  * 
  * @help
- * This plugin allows you to add effects to the battle background, as well as have multiple
- * layers of backgrounds.
+ * ============================================================================
+ * ODUE_BattleBack - Battle Background effects plugin
+ * ============================================================================
+ * 
+ * This plugin allows you to add effects to the battle background, as well as
+ * have multiple layers of backgrounds.
  * 
  * Using the plugin:
  * - You can use the plugin commands to add effects to the battle background.
  * - It is possible to add effects both during and outside a battle.
- * - With this version, you have to set the battle backgrounds using the plugin command.
- *   Database or default "Change battle background" won't work with this version.
- *   You can for example use an autorun event to set the battle backgrounds at the start of the
- *   game or before a battle, or set them in the battle event itself.
+ * 
+ * - With this version, it is recommended to set the battle backgrounds using
+ *   the plugin command "set battle backgrounds". However, you can also
+ *   continue using the default "Change battle background" command, which
+ *   provides less flexibility.
+ * 
+ * - You CAN NOT use the database to set a battle background. To work around
+ *   this, you can for example use an autorun event to set the battle
+ *   backgrounds at the start of the game or before a battle, or set them in
+ *   the battle event itself.
  * 
  * 
  * ###########
  * # WARNING #
  * ###########
  * 
- * This version of the plugin has made major changes to the way battle backgrounds work.
- * The plugin adds a new multi-layer battle background system, which allows you to add
- * more than just 2 backgrounds. However, this means that the older system is no longer
- * compatible with this plugin. If you or your other plugins heavily rely on the default
- * way of handling battle backgrounds, please download the "classic version" of this plugin,
- * found from the GitHub page!
+ * This version of the plugin has made major changes to the way battle
+ * backgrounds work. The plugin adds a new multi-layer battle background
+ * system, which allows you to add more than just 2 backgrounds. However, this
+ * means that the other plugins relying on the default system may not work
+ * properly with this plugin.
+ * If you experience this kind of issue, please download the "classic version"
+ * of this plugin, found from the GitHub page!
  * 
  * 
  * Plugin commands info:
  * 
+ * --- Set battle backgrounds ---
+ * 
+ * This will set the battle backgrounds, just like the default "Change battle
+ * background" command, but with more flexibility. You can set as many battle
+ * backgrounds as you want.
+ * 
+ * In the backgrounds list, the top background will be on the lowest layer, and
+ * the bottom background will be on the highest layer.
+ * 
+ * 
+ * --- Replace battle background ---
+ * 
+ * This will replace one layer with a different background, without affecting
+ * the other layers or any effects applied to them.
+ * 
+ * 
  * --- Scroll ---
  * 
- * Does what you expect it to do: it will continuously move the battle background in the
- * chosen direction.
+ * Does what you expect it to do: it will continuously move the battle
+ * background in the chosen direction.
  * 
  * 
  * --- Wave ---
  * 
- * This will make the battle background wavy, similar to the style of older RPG Makers.
- * Amplitude: the size of the waves. Higher value = longer waves in the horizontal direction.
- * Wavelength: how much space between the waves. Higher value = more waves in the vertical direction.
+ * This will make the battle background wavy, similar to the style of older RPG
+ * Makers.
+ * Amplitude: the size of the waves. Higher value = longer waves in the
+ * horizontal direction.
+ * Wavelength: how much space between the waves. Higher value = more waves in
+ * the vertical direction.
  * Speed: how quickly the waves should move. Higher value = faster.
  * 
  * 
  * * --- Twist ---
  * 
- * This will twist the battle background around a point in the middle of the screen.
- * Radius: how much of the screen should be affected by the twist. Higher value = more of the
- * screen is twisted.
+ * This will twist the battle background around a point in the middle of the
+ * screen.
+ * Radius: how much of the screen should be affected by the twist. Higher value
+ *  = more of the screen is twisted.
  * Angle: how much the background should be twisted. Higher value = more twist.
  * Speed: how quickly the background should be twisted. Higher value = faster.
  * 
  * 
  * * --- Hue shift / brightness ---
  * 
- * This will continuously shift the hue and/or brightness of the battle background.
- * This effect is not entirely accurate, but more a psychedelic / trippy effect.
+ * This will continuously shift the hue and/or brightness of the battle
+ * background.
+ * This effect is not entirely accurate, but more a psychedelic / trippy
+ * effect.
  * Use hue and brightness together for most interesting results.
- * Hue shift can be done in two ways: linear or sine wave. Linear will shift the hue in a constant
- * speed, while sine wave will shift the hue in a sine wave pattern. Sine wave looks smoother,
- * while linear has sharper changes.
+ * Hue shift can be done in two ways: linear or sine wave. Linear will shift
+ * the hue in a constant speed, while sine wave will shift the hue in a sine
+ * wave pattern. Sine wave looks smoother, while linear has sharper changes.
  * 
  * 
  * --- Blend mode ---
  * 
- * This can be used to change how the background blends with the layers below it.
- * For example, additive blend mode will make the background add its colors to the layers below it,
- * while multiply will make the background multiply its colors with the layers below it.
+ * This can be used to change how the background blends with the layers below
+ * it.
+ * For example, additive blend mode will make the background add its colors to
+ * the layers below it, while multiply will make the background multiply its
+ * colors with the layers below it.
  * -
- * Due to the way RPG Maker system works, adding the blend modes for specific layers can be a bit tricky.
- * You have to apply the blend modes in the same order as your backgrounds are.
- * For example, if you have 3 battle backgrounds, and you want to set the blend mode for the second
- * but want to leave the first one as normal, you have to set the first blend mode to "normal",
- * and then add another one and set that to whatever you want.
+ * Due to the way RPG Maker system works, adding the blend modes for specific
+ * layers can be a bit tricky. You have to apply the blend modes in the same
+ * order as your backgrounds are. For example, if you have 3 battle
+ * backgrounds, and you want to set the blend mode for the second but want to
+ * leave the first one as normal, you have to set the first blend mode to
+ * "normal", and then add another one and set that to whatever you want.
  * By default, all blend modes are set to normal, even if no value is given.
+ * 
+ * 
+ * Compatibility with ODUE_Timing plugin:
+ * - The ODUE_Timing plugin supports this plugin's battle background system.
+ *   It allows you to synchronize the audio to the battle background effects.
  * 
  * 
  * Terms of use:
  *
- * 1. You must give credit to ODUE
- * 2. You can freely edit this plugin to your needs. However, you must still credit me.
+ * 1. Please give credit to ODUE
+ * 2. You can freely edit this plugin to your needs.
  * 3. This plugin is free for commercial and non-commercial projects.
- * 4. This plugin is provided as is. I'm not responsible for anything you make with this plugin.
- * 5. You can send feature requests to me on platforms such as Reddit (to u/SanttuPOIKA----).
- *    However, I have no obligation to fulfill your requests.
- * 
- * PLEASE SEND YOUR ISSUES / IDEAS TO THE GITHUB 'ISSUES' PAGE!!!
+ * 4. You can use this plugin for any type of project.
+ * 5. You can send feature requests to me on platforms such as Reddit, 
+ *    Github or YouTube. I will try to fulfill them to my best!
  * 
  * 
  * @command setBackgrounds
@@ -135,6 +174,7 @@
  * @type number
  * @default 0.00
  * @min -100
+ * @max 100
  * @decimals 2
  * 
  * @arg verticalScroll
@@ -143,6 +183,7 @@
  * @type number
  * @default 0.00
  * @min -100
+ * @max 100
  * @decimals 2
  * 
  * @command setWave
@@ -356,6 +397,26 @@ ODUE.BattleBack = ODUE.BattleBack || {};
 
     Sprite_Battleback.prototype.battlebackBitmap = function(filename) {
         return ImageManager.loadBattleback(filename);
+    };
+
+    // Change battleback command
+    const _Game_Map_changeBattleback = Game_Map.prototype.changeBattleback;
+    Game_Map.prototype.changeBattleback = function(
+        battleback1Name,
+        battleback2Name
+    ) {
+        _Game_Map_changeBattleback.call(this, battleback1Name, battleback2Name);
+
+        battlebacks = []; // Erase all first
+        if (battleback1Name) {
+            battlebacks[0] = "battlebacks1/" + battleback1Name;
+        }
+        if (battleback2Name) {
+            battlebacks[1] = "battlebacks2/" + battleback2Name;
+        }
+
+        initializeSettings(battlebacks.length);
+        requestBbgRefresh();
     };
 
     ImageManager.loadBattleback = function(filename) {
