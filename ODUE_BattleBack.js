@@ -1,5 +1,5 @@
 /*:
- * @plugindesc (ver1.4.3) Battle Background effects plugin
+ * @plugindesc (ver1.5) Battle Background effects plugin
  * @author ODUE
  * @url https://github.com/00due/battleback-effects-MZ
  * @target MZ
@@ -40,7 +40,23 @@
  * of this plugin, found from the GitHub page!
  * 
  * 
- * Plugin commands info:
+ * Plugin parameters:
+ * 
+ * --- Troop backgrounds ---
+ * 
+ * If you want to set specific battle backgrounds for each troop, you can
+ * use this parameter. The format is as follows:
+ * "<troop id>, <background 1>, <background 2>, <background 3>, ..."
+ * You have to use paths starting from img/ for every background.
+ * 
+ * Example for this:
+ * 3, battlebacks1/GrassMaze, battlebacks2/IceCave, pictures/Actor1_1
+ * This will set battle backgrounds for troop ID 3, and sets the pictures
+ * as background layers in the order they are listed. You may use as many
+ * backgrounds as you like. 
+ * 
+ * 
+ * Plugin commands:
  * 
  * --- Set battle backgrounds ---
  * 
@@ -127,6 +143,15 @@
  * 4. You can use this plugin for any type of project.
  * 5. You can send feature requests to me on platforms such as Reddit, 
  *    Github or YouTube. I will try to fulfill them to my best!
+ * 
+ * 
+ * 
+ * @param troopSettings
+ * @text Troop backgrounds
+ * @desc Set specific battle backgrounds for each troop. Follow the guide in the help section.
+ * @type text[]
+ * 
+ * 
  * 
  * 
  * @command setBackgrounds
@@ -423,12 +448,43 @@ ODUE.BattleBack = ODUE.BattleBack || {};
         return this.loadBitmap("img/", filename);
     };
 
-    // Plugin commands:
-    PluginManager.registerCommand("ODUE_BattleBack", "setBackgrounds", args => {
-        const backgrounds = JSON.parse(args.battlebacks);
+    
+    // Plugin parameters:
+    let troopBattlebacks = {};
+
+    const troopSettings = PluginManager.parameters("ODUE_BattleBack").troopSettings;
+    if (troopSettings) {
+        console.log(troopSettings);
+        for (const setting of troopSettings) {
+            // Fixme: split parts are not working properly
+            const parts = setting.split(",");
+            console.log(parts);
+            const troopId = Number(parts[0].trim());
+            const backgrounds = parts.slice(1).map(bg => "img/" + bg.trim());
+            troopBattlebacks[troopId] = backgrounds;
+            console.log(`Troop ${troopId} battle backgrounds set: ${backgrounds.join(", ")}`);
+        };
+    }
+
+    const _battleManagerSetup = BattleManager.setup;
+    BattleManager.setup = function(troopId, canEscape, canLose) {
+        _battleManagerSetup.call(this, troopId, canEscape, canLose);
+        if (troopBattlebacks[troopId]) {
+            setBattlebacks(troopBattlebacks[troopId]);
+            console.log(`Battle backgrounds set for troop ${troopId}: ${troopBattlebacks[troopId].join(", ")}`);
+        }
+    };
+
+    let setBattlebacks = function(backgrounds) {
         battlebacks = backgrounds;
         initializeSettings(battlebacks.length);
         requestBbgRefresh();
+    };
+
+    // Plugin commands:
+    PluginManager.registerCommand("ODUE_BattleBack", "setBackgrounds", args => {
+        const backgrounds = JSON.parse(args.battlebacks);
+        setBattlebacks(backgrounds);
     });
 
     PluginManager.registerCommand("ODUE_BattleBack", "replaceBg", args => {
