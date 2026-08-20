@@ -53,7 +53,16 @@
  * 3, battlebacks1/GrassMaze, battlebacks2/IceCave, pictures/Actor1_1
  * This will set battle backgrounds for troop ID 3, and sets the pictures
  * as background layers in the order they are listed. You may use as many
- * backgrounds as you like. 
+ * backgrounds as you like.
+ * 
+ * If you want to disable the default battle backgrounds for troops and
+ * instead use the last battle backgrounds you've set, you can use the plugin
+ * command "Ignore troop battle backgrounds". This will allow you to set a
+ * different battle background for each battle, even if you have set a
+ * default battle background for a specific troop.
+ * 
+ * Additionally, battle background effects will work even if you have set
+ * a default battle background for a troop.
  * 
  * 
  * Plugin commands:
@@ -358,6 +367,17 @@
  * @text remove effects
  * @desc Remove all effects from the battle background (not including scroll).
  * 
+ * @command ignoreTroopSettings
+ * @text Ignore troop battle backgrounds
+ * @desc Ignore the troop battle backgrounds set in the plugin parameters.
+ * 
+ * @arg ignored
+ * @text Ignored?
+ * @type boolean
+ * @on Ignore
+ * @off Use troop defaults
+ * @default true
+ * 
  */
 var ODUE = ODUE || {};
 ODUE.BattleBack = ODUE.BattleBack || {};
@@ -396,6 +416,8 @@ ODUE.BattleBack = ODUE.BattleBack || {};
             });
         }
     };
+
+    let ignoreTroopSettings = false;
 
     const initializeSettings = (count) => {
         initializeBbgFilters(count);
@@ -452,26 +474,23 @@ ODUE.BattleBack = ODUE.BattleBack || {};
     // Plugin parameters:
     let troopBattlebacks = {};
 
-    const troopSettings = PluginManager.parameters("ODUE_BattleBack").troopSettings;
+    const troopSettings = PluginManager.parameters("ODUE_BattleBack").troopSettings
+        ? JSON.parse(PluginManager.parameters("ODUE_BattleBack").troopSettings)
+        : [];
     if (troopSettings) {
-        console.log(troopSettings);
         for (const setting of troopSettings) {
-            // Fixme: split parts are not working properly
             const parts = setting.split(",");
-            console.log(parts);
             const troopId = Number(parts[0].trim());
-            const backgrounds = parts.slice(1).map(bg => "img/" + bg.trim());
+            const backgrounds = parts.slice(1).map(bg => bg.trim());
             troopBattlebacks[troopId] = backgrounds;
-            console.log(`Troop ${troopId} battle backgrounds set: ${backgrounds.join(", ")}`);
         };
     }
 
     const _battleManagerSetup = BattleManager.setup;
     BattleManager.setup = function(troopId, canEscape, canLose) {
         _battleManagerSetup.call(this, troopId, canEscape, canLose);
-        if (troopBattlebacks[troopId]) {
+        if (!ignoreTroopSettings && troopBattlebacks[troopId]) {
             setBattlebacks(troopBattlebacks[troopId]);
-            console.log(`Battle backgrounds set for troop ${troopId}: ${troopBattlebacks[troopId].join(", ")}`);
         }
     };
 
@@ -610,6 +629,11 @@ ODUE.BattleBack = ODUE.BattleBack || {};
         initializeSettings(effectSettings.length);
         requestBbgRefresh();
     });
+
+    PluginManager.registerCommand("ODUE_BattleBack", "ignoreTroopSettings", args => {
+        ignoreTroopSettings = args.ignored === "true";
+    });
+
 
     const requestBbgRefresh = () => {
         if (SceneManager._scene instanceof Scene_Battle) {
